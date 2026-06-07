@@ -1,0 +1,1677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Room Above the Shop — Nineteen Eighty-Four</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0d0a06;
+  --panel:#15100a;
+  --paper:#e3d6b4;
+  --dim:#8d8064;
+  --gold:#d9a93f;
+  --goldhi:#f2cf6e;
+  --red:#c1271b;
+  --reddk:#7a130c;
+  --line:#5a4a2e;
+  --line2:#2e2517;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;}
+body{
+  background:var(--ink);
+  background-image:
+    repeating-linear-gradient(0deg, rgba(255,255,255,0.012) 0 1px, transparent 1px 4px),
+    radial-gradient(ellipse at 50% 0%, #1a140b 0%, #0d0a06 70%);
+  color:var(--paper);
+  font-family:'VT323',monospace;
+  font-size:20px;
+  line-height:1.35;
+  display:flex;
+  justify-content:center;
+  padding:14px 10px 40px;
+}
+#app{width:100%;max-width:980px;}
+
+/* ---------- header ---------- */
+header{
+  display:flex;align-items:flex-end;justify-content:space-between;gap:12px;
+  border:3px solid var(--line2);
+  border-bottom:none;
+  background:#120d07;
+  padding:12px 14px 10px;
+  flex-wrap:wrap;
+}
+.titlerow{display:flex;align-items:center;gap:12px;}
+#bbeye{
+  width:56px;height:32px;
+  image-rendering:pixelated;image-rendering:crisp-edges;
+  flex:none;
+}
+.titleblock h1{
+  font-family:'Press Start 2P',monospace;
+  font-size:13px;color:var(--gold);
+  letter-spacing:1px;line-height:1.6;
+  text-shadow:2px 2px 0 #000;
+}
+.titleblock .sub{color:var(--dim);font-size:18px;margin-top:2px;}
+.meterblock{display:flex;align-items:center;gap:10px;}
+.meterlabel{
+  font-family:'Press Start 2P',monospace;font-size:8px;color:var(--dim);
+  letter-spacing:1px;text-align:right;line-height:1.7;
+}
+.meterlabel b{color:var(--goldhi);font-weight:normal;}
+.pips{display:flex;gap:5px;}
+.pip{
+  width:14px;height:14px;border:2px solid var(--line);
+  background:#0a0805;
+  box-shadow:inset 2px 2px 0 rgba(0,0,0,.6);
+}
+.pip.on{
+  background:var(--gold);
+  border-color:#8a6a22;
+  box-shadow:inset -2px -2px 0 rgba(0,0,0,.35), 0 0 6px rgba(217,169,63,.55);
+}
+#warningBtn{
+  display:none;
+  font-family:'Press Start 2P',monospace;font-size:10px;
+  color:#fff;background:var(--red);
+  border:3px solid var(--reddk);
+  padding:11px 14px;cursor:pointer;
+  box-shadow:3px 3px 0 #000;
+  animation:throb .8s steps(2,end) infinite;
+}
+#warningBtn.show{display:inline-block;}
+@keyframes throb{
+  0%{filter:brightness(1);transform:translate(0,0);}
+  50%{filter:brightness(1.5);transform:translate(0,-2px);}
+}
+
+/* ---------- stage ---------- */
+#stage{
+  position:relative;
+  border:3px solid var(--line2);
+  background:#070503;
+  overflow:hidden;
+}
+#scene{
+  display:block;width:100%;height:auto;
+  aspect-ratio:480/320;
+  image-rendering:pixelated;image-rendering:crisp-edges;
+  cursor:default;
+  touch-action:none;
+}
+#scene.pointy{cursor:pointer;}
+#scene.grabby{cursor:grab;}
+#stage::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(0deg, transparent 0 3px, rgba(0,0,0,.10) 3px 4px);
+  mix-blend-mode:multiply;
+}
+#stage.shake{animation:shake .55s steps(2,end) 1;}
+@keyframes shake{
+  0%{transform:translate(0,0);}
+  15%{transform:translate(-5px,2px);}
+  30%{transform:translate(4px,-3px);}
+  45%{transform:translate(-3px,-2px);}
+  60%{transform:translate(3px,3px);}
+  75%{transform:translate(-2px,1px);}
+  100%{transform:translate(0,0);}
+}
+#hint{
+  border:3px solid var(--line2);border-top:none;
+  background:#120d07;color:var(--dim);
+  font-size:17px;letter-spacing:1px;
+  padding:7px 12px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;
+}
+#hint .k{color:var(--gold);}
+#hint .warnk{color:#ff6a5a;}
+
+/* voice box (iron voice from the telescreen) */
+#voicebox{
+  position:absolute;left:50%;bottom:6%;transform:translateX(-50%);
+  width:min(86%,560px);
+  background:#000;border:3px solid #fff;
+  box-shadow:0 0 0 3px #000, 5px 5px 0 rgba(0,0,0,.8);
+  padding:14px 16px;
+  font-family:'Press Start 2P',monospace;font-size:10px;line-height:2;
+  color:#fff;letter-spacing:1px;
+  display:none;z-index:5;
+}
+#voicebox.show{display:block;}
+#voicebox .src{color:var(--red);font-size:8px;display:block;margin-bottom:8px;}
+
+/* toast — short in-stage notices */
+#toast{
+  position:absolute;left:50%;top:6%;transform:translateX(-50%);
+  width:min(88%,520px);
+  background:#0a0805;border:3px solid var(--gold);
+  box-shadow:4px 4px 0 #000;
+  padding:11px 14px;
+  font-family:'Press Start 2P',monospace;font-size:9px;line-height:1.9;
+  color:var(--goldhi);letter-spacing:1px;
+  display:none;z-index:6;text-align:center;
+}
+#toast.show{display:block;}
+#toast.alarm{border-color:var(--red);color:#ff8a7a;}
+#toast .src{font-size:7px;color:var(--dim);display:block;margin-bottom:6px;}
+
+/* ---------- overlays ---------- */
+.overlay{
+  position:fixed;inset:0;z-index:50;
+  background:rgba(6,4,2,.88);
+  display:flex;align-items:center;justify-content:center;
+  padding:16px;
+}
+.overlay.hidden{display:none;}
+.card{
+  background:var(--panel);
+  border:4px solid var(--line);
+  box-shadow:8px 8px 0 #000, inset 0 0 0 2px #060403;
+  max-width:560px;width:100%;
+  max-height:92vh;overflow:auto;
+  padding:26px 26px 22px;
+  text-align:center;
+}
+.card .kicker{
+  font-family:'Press Start 2P',monospace;font-size:8px;
+  color:var(--red);letter-spacing:2px;margin-bottom:14px;
+}
+.card h2{
+  font-family:'Press Start 2P',monospace;font-size:15px;
+  color:var(--goldhi);line-height:1.8;margin-bottom:14px;
+  text-shadow:2px 2px 0 #000;
+}
+.card p{color:var(--paper);font-size:20px;margin-bottom:12px;text-align:left;}
+.card p.center{text-align:center;color:var(--dim);}
+.endmark{
+  font-family:'Press Start 2P',monospace;font-size:11px;
+  color:var(--dim);letter-spacing:3px;margin:14px 0 6px;
+}
+.pixbtn{
+  font-family:'Press Start 2P',monospace;font-size:10px;
+  color:var(--goldhi);background:#2c2415;
+  border:3px solid var(--line);
+  padding:12px 18px;cursor:pointer;margin-top:8px;
+  box-shadow:4px 4px 0 #000;
+  letter-spacing:1px;
+}
+.pixbtn:hover{background:#3a3020;}
+.pixbtn:active{transform:translate(2px,2px);box-shadow:2px 2px 0 #000;}
+.pixbtn.red{color:#fff;background:var(--red);border-color:var(--reddk);}
+.pixbtn.red:hover{background:#d83a2c;}
+
+/* ---------- object modal ---------- */
+#modal .panel{
+  background:var(--panel);
+  border:4px solid var(--line);
+  box-shadow:8px 8px 0 #000, inset 0 0 0 2px #060403;
+  width:min(880px,100%);
+  max-height:94vh;overflow:auto;
+  display:grid;grid-template-columns:316px 1fr;
+  position:relative;
+}
+#modal .artside{
+  background:#080604;
+  border-right:3px solid var(--line2);
+  padding:18px 16px 14px;
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+  position:relative;
+}
+#artCv{
+  width:280px;max-width:100%;height:auto;
+  image-rendering:pixelated;image-rendering:crisp-edges;
+  border:3px solid var(--line2);
+  background:
+    radial-gradient(circle at 50% 42%, #1c150c 0%, #0a0705 72%);
+}
+.eralabel{
+  font-family:'Press Start 2P',monospace;font-size:8px;
+  color:var(--dim);letter-spacing:2px;text-align:center;line-height:1.8;
+}
+.eralabel.modern{color:#4db8ff;}
+#eyeBtn{
+  display:flex;align-items:center;gap:8px;
+  font-family:'Press Start 2P',monospace;font-size:8px;
+  color:#0a0805;background:var(--gold);
+  border:3px solid #8a6a22;
+  padding:8px 11px;cursor:pointer;
+  box-shadow:3px 3px 0 #000;
+  letter-spacing:1px;
+}
+#eyeBtn:hover{background:var(--goldhi);}
+#eyeBtn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 #000;}
+#eyeBtn svg{display:block;}
+#modernCap{
+  display:none;
+  border:3px solid #21425c;
+  background:#0c1722;color:#bcd6ea;
+  font-size:18px;line-height:1.35;
+  padding:10px 12px;width:280px;max-width:100%;
+}
+#modernCap.show{display:block;}
+#modal .textside{padding:22px 24px 24px;}
+#modal .objkicker{
+  font-family:'Press Start 2P',monospace;font-size:8px;
+  color:var(--red);letter-spacing:2px;margin-bottom:10px;
+}
+#modal h2{
+  font-family:'Press Start 2P',monospace;font-size:14px;
+  color:var(--goldhi);line-height:1.8;margin-bottom:12px;
+  text-shadow:2px 2px 0 #000;
+}
+#modal .meaning{color:var(--paper);font-size:20px;margin-bottom:16px;}
+#modal blockquote{
+  border-left:5px solid var(--red);
+  background:#1b150c;
+  padding:12px 14px;margin-bottom:8px;
+  color:#e3c87c;font-size:21px;line-height:1.3;
+  white-space:pre-line;
+}
+#modal .cite{
+  font-family:'Press Start 2P',monospace;font-size:7px;
+  color:var(--dim);letter-spacing:1px;line-height:1.9;
+}
+#closeBtn{
+  position:sticky;top:0;float:right;
+  font-family:'Press Start 2P',monospace;font-size:10px;
+  color:var(--paper);background:#241c10;
+  border:3px solid var(--line);
+  width:38px;height:38px;cursor:pointer;
+  box-shadow:3px 3px 0 #000;
+  z-index:2;margin:8px;
+}
+#closeBtn:hover{background:var(--red);color:#fff;}
+#scrollChip{
+  position:sticky;bottom:8px;
+  grid-column:1 / -1;
+  justify-self:center;
+  font-family:'Press Start 2P',monospace;font-size:8px;
+  color:#fff;background:var(--red);
+  border:3px solid var(--reddk);
+  box-shadow:3px 3px 0 #000;
+  padding:7px 11px;letter-spacing:1px;
+  pointer-events:none;
+  display:none;
+  animation:bob 1s steps(2,end) infinite;
+}
+#scrollChip.show{display:block;}
+@keyframes bob{0%{transform:translateY(0);}50%{transform:translateY(3px);}}
+
+/* ---------- finale ---------- */
+#finale .card{max-width:640px;}
+#finale h2.big{
+  font-size:18px;color:var(--red);
+  text-shadow:3px 3px 0 #000;
+  letter-spacing:2px;
+}
+#finale .rule{
+  height:3px;background:var(--line2);margin:16px 0;
+}
+
+@media (max-width:700px){
+  body{padding:8px 6px 30px;font-size:18px;}
+  .titleblock h1{font-size:10px;}
+  #bbeye{width:44px;height:25px;}
+  #modal .panel{grid-template-columns:1fr;}
+  #modal .artside{border-right:none;border-bottom:3px solid var(--line2);}
+  #artCv,#modernCap{width:min(280px,86vw);}
+  .card h2{font-size:12px;}
+  #finale h2.big{font-size:14px;}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="titlerow">
+      <canvas id="bbeye" width="28" height="16" title="He is watching."></canvas>
+      <div class="titleblock">
+        <h1>THE ROOM ABOVE THE SHOP</h1>
+        <div class="sub">Nineteen Eighty-Four &middot; Mr Charrington's attic</div>
+      </div>
+    </div>
+    <div class="meterblock">
+      <div class="meterlabel">FRAGMENTS OF<br>THE PAST <b id="count">0</b>/6</div>
+      <div class="pips" id="pips"></div>
+      <button id="warningBtn">&#9888; WARNING</button>
+    </div>
+  </header>
+  <div id="stage">
+    <canvas id="scene" width="480" height="320"></canvas>
+    <div id="voicebox"><span class="src">— THE IRON VOICE —</span><span id="voicetext"></span></div>
+    <div id="toast"><span class="src" id="toastSrc"></span><span id="toastText"></span></div>
+  </div>
+  <div id="hint">
+    <span id="hintLeft">TAP A <span class="k">GLOWING</span> OBJECT &middot; SCROLL / PINCH TO <span class="k">ZOOM</span>, DRAG TO LOOK AROUND</span>
+    <span>THE <span class="k">EYE</span> SHOWS WHAT IT IS TODAY</span>
+  </div>
+</div>
+
+<!-- intro -->
+<div class="overlay" id="intro">
+  <div class="card">
+    <div class="kicker">LONDON &middot; AIRSTRIP ONE</div>
+    <h2>THE ROOM ABOVE<br>MR CHARRINGTON'S SHOP</h2>
+    <p>No telescreen. Or so they believed. A pocket of the past where the Party cannot see, lit by one oil lamp, rented for a few dollars a week.</p>
+    <p>Six objects in this room carry the meaning of the book. Tap what glows. Inside each one, press the <span style="color:var(--gold)">EYE</span> to see what that object has become today.</p>
+    <p class="center">Find all six.</p>
+    <button class="pixbtn" id="enterBtn">ENTER THE ROOM</button>
+  </div>
+</div>
+
+<!-- object modal -->
+<div class="overlay hidden" id="modal">
+  <div class="panel" id="modalPanel">
+    <button id="closeBtn">&#10005;</button>
+    <div class="artside">
+      <span class="eralabel" id="eraLabel">— 1984 —</span>
+      <canvas id="artCv" width="140" height="140"></canvas>
+      <div id="modernCap"></div>
+      <button id="eyeBtn">
+        <svg width="26" height="16" viewBox="0 0 12 7" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">
+          <rect x="4" y="0" width="4" height="1" fill="#0a0805"/>
+          <rect x="2" y="1" width="2" height="1" fill="#0a0805"/>
+          <rect x="8" y="1" width="2" height="1" fill="#0a0805"/>
+          <rect x="1" y="2" width="1" height="1" fill="#0a0805"/>
+          <rect x="10" y="2" width="1" height="1" fill="#0a0805"/>
+          <rect x="0" y="3" width="1" height="1" fill="#0a0805"/>
+          <rect x="11" y="3" width="1" height="1" fill="#0a0805"/>
+          <rect x="1" y="4" width="1" height="1" fill="#0a0805"/>
+          <rect x="10" y="4" width="1" height="1" fill="#0a0805"/>
+          <rect x="2" y="5" width="2" height="1" fill="#0a0805"/>
+          <rect x="8" y="5" width="2" height="1" fill="#0a0805"/>
+          <rect x="4" y="6" width="4" height="1" fill="#0a0805"/>
+          <rect x="4" y="2" width="4" height="3" fill="#0a0805"/>
+          <rect x="5" y="2" width="2" height="3" fill="#7a130c"/>
+          <rect x="5" y="3" width="2" height="1" fill="#0a0805"/>
+          <rect x="7" y="2" width="1" height="1" fill="#fff"/>
+        </svg>
+        <span id="eyeText">SEE TODAY</span>
+      </button>
+    </div>
+    <div class="textside">
+      <div class="objkicker" id="objKicker"></div>
+      <h2 id="objName"></h2>
+      <p class="meaning" id="objMeaning"></p>
+      <blockquote id="objQuote"></blockquote>
+      <div class="cite" id="objCite"></div>
+    </div>
+    <div id="scrollChip">&#9660; SCROLL FOR THE QUOTE &#9660;</div>
+  </div>
+</div>
+
+<!-- finale -->
+<div class="overlay hidden" id="finale">
+  <div class="card">
+    <div class="kicker">THE PICTURE HAS FALLEN</div>
+    <h2 class="big">IGNORANCE IS STRENGTH</h2>
+    <div class="rule"></div>
+    <p>You have uncovered the symbols of the past, but the telescreen was always watching. In a modern world where our devices listen, our data is harvested, and our intimate lives are commercialized, are we simply rewiring ourselves willingly? If ignorance is strength, what is the cost of your convenience?</p>
+    <p class="center">Six fragments of the past. All of them watched, the whole time.</p>
+    <div class="rule"></div>
+    <div class="endmark">&#9632; THE END &#9632;</div>
+    <p class="center">You may close the room now, or step back inside and look again.</p>
+    <button class="pixbtn red" id="resetBtn">RETURN TO THE ROOM</button>
+  </div>
+</div>
+
+<script>
+"use strict";
+/* ============================================================
+   THE ROOM ABOVE THE SHOP — pixel engine (v2)
+   Scene is rendered to an offscreen 480x320 buffer with hard
+   scanline-rasterized polygons, then blitted to the visible
+   canvas through a zoom/pan view transform.
+   ============================================================ */
+const cv  = document.getElementById('scene');
+const VC  = cv.getContext('2d');
+const OFF = document.createElement('canvas');
+OFF.width = 480; OFF.height = 320;
+const C   = OFF.getContext('2d');
+VC.imageSmoothingEnabled = false;
+C.imageSmoothingEnabled  = false;
+const W = 480, H = 320;
+const OX = 240, OY = 136;          // back corner of the floor
+const WALL_H = 100, EXT = 85;      // wall height, wall length in iso units
+
+/* ---------- view (zoom + pan + parallax) ---------- */
+const MINZ = 1.06, MAXZ = 2.6, PARA_Z = 1.14;
+const view = { z: MINZ, x: (W - W*MINZ)/2, y: (H - H*MINZ)/2 };
+let hoverNX = 0.5, hoverNY = 0.5;   // pointer position over the canvas, 0..1
+function clampView(){
+  view.z = Math.min(MAXZ, Math.max(MINZ, view.z));
+  const minX = W - W*view.z, minY = H - H*view.z;
+  view.x = Math.min(0, Math.max(minX, view.x));
+  view.y = Math.min(0, Math.max(minY, view.y));
+}
+function zoomAt(cx, cy, nz){
+  nz = Math.min(MAXZ, Math.max(MINZ, nz));
+  const lx = (cx - view.x)/view.z, ly = (cy - view.y)/view.z;
+  view.z = nz;
+  view.x = cx - lx*nz;
+  view.y = cy - ly*nz;
+  clampView();
+}
+
+/* ---------- low-level raster helpers ---------- */
+function px(x, y, w, h, col){ C.fillStyle = col; C.fillRect(x|0, y|0, w, h); }
+function poly(pts, col){
+  C.fillStyle = col;
+  let minY = 1e9, maxY = -1e9;
+  for (const p of pts){ if (p[1] < minY) minY = p[1]; if (p[1] > maxY) maxY = p[1]; }
+  minY = Math.max(0, Math.floor(minY)); maxY = Math.min(H - 1, Math.ceil(maxY));
+  for (let y = minY; y <= maxY; y++){
+    const yc = y + 0.5, xs = [];
+    for (let i = 0; i < pts.length; i++){
+      const a = pts[i], b = pts[(i + 1) % pts.length];
+      if ((a[1] <= yc && b[1] > yc) || (b[1] <= yc && a[1] > yc)){
+        xs.push(a[0] + (yc - a[1]) / (b[1] - a[1]) * (b[0] - a[0]));
+      }
+    }
+    xs.sort((p, q) => p - q);
+    for (let i = 0; i + 1 < xs.length; i += 2){
+      const x0 = Math.round(xs[i]), x1 = Math.round(xs[i + 1]);
+      if (x1 > x0) C.fillRect(x0, y, x1 - x0, 1);
+    }
+  }
+}
+
+/* ---------- iso helpers ---------- */
+function P(u, v, h){ return [OX + 2*u - 2*v, OY + u + v - h]; }
+function isoBox(u, v, w, d, h, cT, cL, cR, h0 = 0){
+  poly([P(u,v+d,h0), P(u+w,v+d,h0), P(u+w,v+d,h0+h), P(u,v+d,h0+h)], cL);
+  poly([P(u+w,v,h0), P(u+w,v+d,h0), P(u+w,v+d,h0+h), P(u+w,v,h0+h)], cR);
+  poly([P(u,v,h0+h), P(u+w,v,h0+h), P(u+w,v+d,h0+h), P(u,v+d,h0+h)], cT);
+}
+function isoTop(u, v, w, d, h, col){
+  poly([P(u,v,h), P(u+w,v,h), P(u+w,v+d,h), P(u,v+d,h)], col);
+}
+function WL(v, h){ return [OX - 2*v, OY + v - h]; }
+function WR(u, h){ return [OX + 2*u, OY + u - h]; }
+function wallLrect(v, h, dv, dh, col){
+  poly([WL(v,h), WL(v+dv,h), WL(v+dv,h+dh), WL(v,h+dh)], col);
+}
+function wallRrect(u, h, du, dh, col){
+  poly([WR(u,h), WR(u+du,h), WR(u+du,h+dh), WR(u,h+dh)], col);
+}
+
+/* ---------- sprite-map renderer ---------- */
+function drawMap(ctx, map, pal, x, y, s){
+  s = s || 1;
+  const rows = map.split('\n').filter(r => r.length);
+  for (let r = 0; r < rows.length; r++){
+    for (let c = 0; c < rows[r].length; c++){
+      const k = rows[r][c];
+      if (k === '.' || k === ' ') continue;
+      const col = pal[k];
+      if (!col) continue;
+      ctx.fillStyle = col;
+      ctx.fillRect(x + c*s, y + r*s, s, s);
+    }
+  }
+}
+function mapSize(map){
+  const rows = map.split('\n').filter(r => r.length);
+  let w = 0; rows.forEach(r => { if (r.length > w) w = r.length; });
+  return [w, rows.length];
+}
+
+/* ---------- palette ---------- */
+const PAL = {
+  wallL1:'#46392a', wallL2:'#3d3224', wallR1:'#3a3022', wallR2:'#332a1d',
+  seamL:'#2f2719', seamR:'#2a2316',
+  wainL:'#2b2114', wainR:'#251c11', rail:'#56452a',
+  floorA:'#4a3520', floorB:'#3f2c1a', floorSeam:'#2c1f10',
+  mahog:'#5c2f1b', mahogD:'#43200f', mahogL:'#7a4326',
+  sheet:'#c9bd9f', sheetD:'#a89c80', blanket:'#5d5c38', blanketD:'#4a4a2c',
+  bolster:'#e0d6bc',
+  wood:'#6b4a2a', woodD:'#523722', woodL:'#83603a',
+  brass:'#9c7a32', flame1:'#ffd75e', flame2:'#ff9c34', glass:'#ffeaa6',
+  stove:'#4e5240', stoveD:'#3b3e30', stoveL:'#5f6450',
+  leather:'#6b4a35', leatherD:'#553722', leatherL:'#7d5a40',
+  night:'#0f0c08'
+};
+
+/* ============================================================
+   CLOSE-UP PIXEL ART (1984 originals + present-day counterparts)
+   ============================================================ */
+const ART = {};
+
+ART.bed = { pal:{
+  M:'#3f1f0f', m:'#5c2f1b', h:'#7a4326', B:'#5d5c38', b:'#4a4a2c',
+  S:'#c9bd9f', s:'#a89c80', P:'#e0d6bc', p:'#c3b89c', L:'#c0263a', G:'#d9a441'
+}, map:`
+..MMMMMM..........................
+.MmhhhhmM.........................
+.MmhhhhmM.........................
+.MmmmmmmM.........................
+.MmmmmmmM.........................
+.MmmmmmmM..PPPPPPP................
+.MmmmmmmM.PPPPPPPPp...............
+.MmmmmmmM.PPPPPPPPp...............
+.MmmmmmmM.pPPPPPPpp...............
+.MmmmmmmMSSppppppSSSSSSSSSSSSSSs..
+.MmmmmmmMSSSSSSSSSSSSSSSSSSSSSSs..
+.MmmmmmmMSsSLG.sSSSSSSSSSSSSSSSs..
+.MmmmmmmMSSSSSSBBBBBBBBBBBBBBBBs..
+.MmmmmmmMBBBBBBBBBBBBBBBBBBBBBBs..
+.MmmmmmmMBbBBBBBBBBBBbBBBBBBBBBs..
+.MmmmmmmMBBBBBBbBBBBBBBBBBbBBBBs..
+.MmmmmmmMBBBBBBBBBBBBBBBBBBBBBBs..
+.MmmmmmmMMMMMMMMMMMMMMMMMMMMMMM...
+.MmmmmmmM.Mmm.................Mmm.
+.MMMMMMMM.Mmm.................Mmm.
+..........MMM.................MMM.
+`};
+
+/* phone face-down on the nightstand: the unposted moment */
+ART.bedModern = { pal:{
+  K:'#2a2d33', k:'#3d434c', c:'#14161a', l:'#5a6570', d:'#1c1f24',
+  T:'#5a3d22', t:'#4a3120', M:'#e8e0c8', S:'#0c0a07'
+}, map:`
+......................
+..MMM.........MMMM....
+.MM............M.M....
+.MM..........MMMM.....
+.MM..........M........
+..MMM........MMMM.....
+......................
+.....KKKKKKKKKKKK.....
+....KkkkkkkkkkkkkK....
+....KkcccckkkkkkkK....
+....KkclclkkkkkkkK....
+....KkcccckkkkkkkK....
+....KkclclkkkkkkkK....
+....KkcccckkkkkkkK....
+....KkkkkkkkkkkkkK....
+....KkkkkkkkkkkkkK....
+....KkkkkkkdkkkkkK....
+....KkkkkkkkkkkkkK....
+....KkkkkkkkkkkkkK....
+....KkkkkkkkkkkkkK....
+....KkkkkkkkkkkkkK....
+....KkkkkkkkkkkkkK....
+.....KKKKKKKKKKKK.....
+....SSSSSSSSSSSSSS....
+TTTTTTTTTTTTTTTTTTTTTT
+TtTTTTtTTTTTTTtTTTTtTT
+TTTTTTTTTTTTTTTTTTTTTT
+`};
+
+ART.window = { pal:{
+  F:'#4a3525', f:'#6b4d30', A:'#9aa3af', a:'#8a93a0', L:'#2b2b2b',
+  D:'#ecebe4', d:'#c9c8bd', B:'#b05a3c', W:'#e8e4d8', P:'#cdbb92',
+  E:'#6e5a4a', R:'#7a4034', r:'#63332a', C:'#d8d2c6', M:'#f0ead6', K:'#1a1a1a'
+}, map:`
+FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+FfffffffffffffffffffffffffffffFF
+FfCCAAAAAAAAAAAAAAAAAAAAAAAACCfF
+FfCCAAAAAAAAAAAAAAAAAAAAAAAACCfF
+FfCCAaAAAAAAAAAAAAAAAaAAAAAACCfF
+FfCCAAAAAAAAAAAAAAAAAAAAAAAACCfF
+FfCCLLLLLLLLLLLLLLLLLLLLLLLLCCfF
+FfCCADDDAAADDDAAAADDDAAAAWWACCfF
+FfCCADDDAAADDDAAAADDDAAAWWWWCCfF
+FfCCADDdAAADDdAAAADDdAAAWBWWCCfF
+FfCCAdddAAAdddAAAAdddAAABBBACCfF
+FfCCAAAAAAAAAAAAAAAAAAABPPPBCCfF
+FfCCAAAAAAAAAAAAAAAAAAAAPPPACCfF
+FfCCAaAAAAAAAAAaAAAAAAAAPPPACCfF
+FfCCAAAAAAAAAAAAAAAAAAAAPPPACCfF
+FfCCRRRRRRRRRRRRRRRRRRRRPPPRCCfF
+FfCCRrRRRRrRRRRRRrRRRRRREEERCCfF
+FfCCRRRRRRRRRrRRRRRRRrRREEERCCfF
+FfCCRRrRRRRRRRRRRrRRRRRRErERCCfF
+FFffffffffffffffffffffffffffffFF
+FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+..ffMMMMMM......................
+..fMMKMKMM......................
+..fMMMMKMM......................
+..ffMMMMMM......................
+`};
+
+/* the versificator, shipped: a machine that writes the songs */
+ART.windowModern = { pal:{
+  F:'#4a4e54', f:'#5a5f66', D:'#2e3136', R:'#1d1f23', r:'#c1271b',
+  Y:'#e0b04c', G:'#16241c', g:'#57c785', N:'#e8e0c8', K:'#0e1012', k:'#1c1f23'
+}, map:`
+..............................
+....RRRRR.......RRRRR...N.....
+...RRDDDRR.....RRDDDRR..N.....
+...RDDrDDR.....RDDrDDR..N.....
+...RDDDDDR.....RDDDDDR.NN.....
+...RRDDDRR.....RRDDDRRNNN.....
+....RRRRR.......RRRRR.........
+..FFFFFFFFFFFFFFFFFFFFFF..N...
+..FffffffffffffffffffffF..N...
+..FfGGGGGGGGGGGfYYfYYffF..N...
+..FfGggGgggGggGfYYfYYffF.NN...
+..FfGgGgGgGgGgGffffffffFNNN...
+..FfGGGGGGGGGGGfYYfYYffF......
+..FfffffffffffffYYfYYffF......
+..FfKKKKKKKKKKKKKKKKKkfF......
+..FfKNNNNNNNNNNNNNNNKkfF......
+..FffffffffffffffffffffF......
+..FFFFFFFFFFFFFFFFFFFFFF......
+...DDDD............DDDD.......
+...DDDD............DDDD.......
+`};
+
+ART.weight = { pal:{
+  G:'#8fb9c6', g:'#6f9aaa', w:'#dceff4', K:'#b85b7c', k:'#de8aa4',
+  T:'#4a3525', t:'#3a2a1c', S:'#2c343a'
+}, map:`
+...........GGGGGG...........
+.........GGGGGGGGGG.........
+........GGGwwGGGGGGG........
+.......GGwwwGGGGGGGGg.......
+......GGwwGGGGGGGGGGGg......
+.....GGwwGGGGGGGGGGGGGg.....
+.....GGwGGGGGkkGGGGGGGg.....
+....GGGGGGGkkkkkGGGGGGGg....
+....GGGGGGkkKKkkkGGGGGGg....
+....GGGGGkkKKKKkkGGGGGGg....
+....GGGGGkKKkKKKkkGGGGGg....
+....GGGGGkkKKKKkkGGGGggg....
+....GGGGGGkkkkkKkGGGGGgg....
+.....GGGGGGGKKkkGGGGGgg.....
+.....GGGGGGGGKGGGGGGggg.....
+......GGGGGGgKgGGGGggg......
+.......GgGGGGGGGGggg........
+........gggggggggg..........
+....TTTTTTTTTTTTTTTTTTT.....
+...TtTTTTTTTTTTTTTTTTTtT....
+...TTTTTTTTTTTTTTTTTTTTT....
+`};
+
+ART.weightModern = { pal:{
+  V:'#17171c', v:'#2c2c34', R:'#b03a3a', W:'#f0efe8', d:'#d5d3c8',
+  T:'#4f8388', Y:'#e8c95c', G:'#6b8f5a', K:'#0c0c0e'
+}, map:`
+.....VVVVVV...................
+...VVVvvvvVVV.................
+..VVvvVVVVvvVV................
+.VVvVVVVVVVVvVV...............
+.VvVVVVVVVVVVvV.WWWWWWWWWWWW..
+VVvVVVRRRRVVVvVVWddddddddddW..
+VVVVVRRRRRRVVVVVWdTTTTTTTTdW..
+VVvVVRRWWRRVVvVVWdTTYYTTTTdW..
+VVvVVRRWWRRVVvVVWdTTYYTTTTdW..
+VVVVVRRRRRRVVVVVWdTTTTTTTTdW..
+VVvVVVRRRRVVVvVVWdGGGGGGGGdW..
+.VvVVVVVVVVVVvVVWdGGGGGGGGdW..
+.VVvVVVVVVVVvVVVWddddddddddW..
+..VVvvVVVVvvVVVVWWWWWWWWWWWW..
+...VVVvvvvVVV...WWWWWWWWWWWW..
+.....VVVVVV.....WWWWWWWWWWWW..
+`};
+
+/* a proper rat: side profile, emerging from the hole */
+ART.rat = { pal:{
+  O:'#3b2d1b', o:'#46361f', K:'#070503', B:'#7a5a3e', b:'#957450',
+  D:'#5d452c', p:'#c98a86', N:'#e09a96', E:'#0a0a08', W:'#ffffff',
+  w:'#cfc8b8', t:'#c79a8a', T:'#a87868'
+}, map:`
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+OoOOOOOOoOOOOOOOOOOoOOOOOOOoOOOOOO
+OOOOOOOOOOOOOOOOOOOO..KKKKKKK..OOO
+OOOOOOOOOOOOOOOOOOO.KKKKKKKKKK.OOO
+OOOOOOOOOOOOOOOOOO.KKKKKKKKKKK.OOO
+OOOOOOOOOOOOOOOOOO.KKKKKKKKKKK.OOO
+OOOOOO.pp.OOOOOOO.KKKKKKKKKKKK.OOO
+OOOOO.pppp...BBBBKKKKKKKKKKKKK.OOO
+OOOOO.BpBB.BBbbbBBBKKKKKKKKKKK.OOO
+OOOO.BBBBBBBbbbbbbBBKKKKKKKKKK.OOO
+OOO.BBEWBBBbbbbbbbbBBKKKKKKKKK.OOO
+OO.BBBEBBBBbbbbbbbbbBKKKKKKKKK.OOO
+O.NBBBBBBBBbbbbbbbbBBKKKKKKKKK.OOO
+O.NNBBBBBBBBBBBBBBBBBKKKKKKKKK.OOO
+Ow..wBDBBBBBBBBBBBBBtKKKKKKKKK.OOO
+Ow.w.BBDDBBBDDBBBDDBttKKKKKKKK.OOO
+OO.w..BB..BB...BB..OOttttt.OOOOOOO
+OOOOO.bb..bb...bb..OOOOOOtttt.OOOO
+OoOOOOOoOOOOOOOOOoOOOOOOOOOOtt.OOO
+OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+`};
+
+ART.ratModern = { pal:{
+  K:'#23262c', k:'#3d434c', s:'#10181f', W:'#e8edf2', R:'#e03c3c',
+  r:'#8a1f1f', g:'#46505c', G:'#39424c', Y:'#e0b04c'
+}, map:`
+..KKKKKKKKKKKK..
+.KkkkkkkkkkkkkK.
+.KkssssssssRRK..
+.KksWWWWWssRRK..
+.KksggggggsssK..
+.Kks.R.ggggssK..
+.KksRRRggggssK..
+.KksssssssssK...
+.KksWWWWWWsssK..
+.KksggggggsssK..
+.Kks.R.gggsssK..
+.KksRRRgggsssK..
+.KkssssssssssK..
+.KksWWWWWWWssK..
+.KksggggggsssK..
+.KksRRr.sssssK..
+.Kks.RRr.ssssK..
+.Kks..RRrssssK..
+.Kks...RRrsssK..
+.KkssssssssssK..
+.Kkssss.W.sssK..
+.KkssssWWWsssK..
+.KkkkkkkkkkkkK..
+..KKKKKKKKKKK...
+`};
+
+ART.print = { pal:{
+  R:'#5a2c20', r:'#76402c', Y:'#c9a23f', P:'#d6cdb6', p:'#c6bda6',
+  S:'#5c6b78', s:'#46525c'
+}, map:`
+RRRRRRRRRRRRRRRRRRRRRRRRRR
+RrrrrrrrrrrrrrrrrrrrrrrrrR
+RrYYYYYYYYYYYYYYYYYYYYYYrR
+RrYPPPPPPPPPPPPPPPPPPPPYrR
+RrYPPPPPPPPPPPPPPPPPPPPYrR
+RrYPPPPPPPPPsPPPPPPPPPPYrR
+RrYPPPPPPPPsssPPPPPSPPPYrR
+RrYPPPPPPPsssssPPPPSPPPYrR
+RrYPPPPPPssSSSssPPPSSPPYrR
+RrYPPPPPsSSSSSSSsPPSsPPYrR
+RrYPPPPsSSSSSSSSSsPSSPPYrR
+RrYPPPsSSsSSsSSsSSsSSPPYrR
+RrYPPPsSSSSSSSSSSSsSSPPYrR
+RrYPPPsSSsSSsSSsSSsSSPPYrR
+RrYPPPsSSSSSSSSSSSsSSPPYrR
+RrYPPPsSSsSSsSSsSSsSSPPYrR
+RrYPPPssssssssssssssSPPYrR
+RrYPPppppppppppppppppppYrR
+RrYPPPPPPPPPPPPPPPPPPPPYrR
+RrYYYYYYYYYYYYYYYYYYYYYYrR
+RrrrrrrrrrrrrrrrrrrrrrrrrR
+RRRRRRRRRRRRRRRRRRRRRRRRRR
+`};
+
+ART.printModern = { pal:{
+  F:'#3a3d42', f:'#4b4f56', B:'#4db8ff', b:'#2a7aa8', D:'#26282c',
+  T:'#2e3136', W:'#cfe8ff'
+}, map:`
+......TTTTTTTTTT......
+.....TBBBBBBBBBBT.....
+.....TBbbbbbbbbBT.....
+......FFFFFFFFFF......
+...W..FfFfFfFfFf..W...
+..W...FFfFfFfFfF...W..
+..W.W.FfFfFfFfFf.W.W..
+..W.W.FFfFfFfFfF.W.W..
+..W.W.FfFfFfFfFf.W.W..
+..W...FFfFfFfFfF...W..
+...W..FfFfFfFfFf..W...
+......FFfFfFfFfF......
+......FfFfFfFfFf......
+......FFfFfFfFfF......
+......FfFfFfFfFf......
+......FFFFFFFFFF......
+.....DDDDDDDDDDDD.....
+.....DDDDDDDDDDDD.....
+`};
+
+/* the book, unmistakably a book: thick page block, tied with string */
+ART.book = { pal:{
+  K:'#1d1b18', k:'#2e2b26', e:'#5a4630', s:'#8a8578', W:'#d8d0bc',
+  w:'#b5ad99', S:'#0c0a07', T:'#5a3d22', t:'#4a3120'
+}, map:`
+................................
+........KKKKKKKKKKKKKKKKKK.....
+.......KkkkkkkssSkkkkkkkkkK....
+......KkkkkkkkssSkkkkkkkkkK....
+.....KkkkkkkkkssSkkkkkkkkkK....
+....KkkkkkkkkkssSkkkkkkkkkK....
+...KkkkkkkkkkkssSkkkkkkkkkK....
+...KKKKKKKKKKKssSKKKKKKKKKK....
+...WWWWWWWWWWWWWWWWWWWWWWWK....
+...wWWWWWWWWWWWWWWWWWWWWWWK....
+...WwWWWWWWWWWWWWWWWWWWWWWK....
+...wWWWWWWWWWWWWWWWWWWWWWWK....
+...WwWWWWWWWWWWWWWWWWWWWWWK....
+...eKKKKKKKKKKKKKKKKKKKKKKK....
+....eKKKKKKKKKKKKKKKKKKKKe.....
+......SSSSSSSSSSSSSSSSSSS......
+TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
+TtTTTTTtTTTTTTTTtTTTTTTtTTTTTTTT
+TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
+`};
+
+/* the truth, freely available and buried under the feed */
+ART.bookModern = { pal:{
+  K:'#23262c', k:'#3d434c', s:'#10181f', W:'#e8edf2',
+  P:'#d96a8a', T:'#4fa3a8', Y:'#e0b04c', V:'#8a6ad9',
+  g:'#6a7178', d:'#4a5158'
+}, map:`
+..KKKKKKKKKKKKKK..
+.KkkkkkkkkkkkkkkK.
+.KkssssssssssssK..
+.KksPPPsWWWWWssK..
+.KksPPPsWWssssK...
+.KksPPPsWWWWWssK..
+.KkssssssssssssK..
+.KksTTTsWWWWssK...
+.KksTTTsWWWWWssK..
+.KksTTTsWWssssK...
+.KkssssssssssssK..
+.KksYYYsWWWWWssK..
+.KksYYYsWWWssssK..
+.KksYYYsWWWWssK...
+.KkssssssssssssK..
+.KksVVVsWWWWssK...
+.KksVVVsWWWWWssK..
+.KksVVVsWWssssK...
+.KkssssssssssssK..
+.Kksddds.g.g..sK..
+.Kksdddsg.g.g.sK..
+.KkssssssssssssK..
+.KkkkkkkkkkkkkkK..
+..KKKKKKKKKKKKK...
+`};
+
+/* ---------- small in-scene sprites ---------- */
+const SPR = {
+  proleUp: { pal:{ W:'#e8e4d8', B:'#b05a3c', P:'#cdbb92', E:'#6e5a4a' }, map:`
+..WWW...
+.WWBWW..
+..BBB...
+B..P..B.
+.B.P.B..
+..PPP...
+..PPP...
+..PPP...
+..EEE...
+..EEE...
+..E.E...
+` },
+  proleDown: { pal:{ W:'#e8e4d8', B:'#b05a3c', P:'#cdbb92', E:'#6e5a4a' }, map:`
+..WWW...
+.WWBWW..
+..BBB...
+..PPP...
+.BPPPB..
+.B.P.B..
+..PPP...
+..PPP...
+..EEE...
+..EEE...
+..E.E...
+` },
+  ratS: { pal:{ B:'#7a5a3e', b:'#957450', N:'#e09a96', E:'#0a0a08',
+                p:'#c98a86', t:'#c79a8a', W:'#ffffff' }, map:`
+....pp.bbb...
+...BBBBBbbb..
+..BEWBBBBbb..
+.NBBBBBBBBb..
+.NBBBBBBBb...
+..BB.BB.Bttt.
+..bb.bb....tt
+` },
+  music: { pal:{ M:'#f0ead6', K:'#1a1a1a' }, map:`
+MMMMMM
+MKMKMM
+MMMKMM
+MMMMMM
+` }
+};
+
+/* ============================================================
+   OBJECT DATA — meaning, quotes, present-day counterparts
+   ============================================================ */
+const OBJECTS = [
+  {
+    id:'bed', kicker:'OBJECT I — REBELLION',
+    name:'The Mahogany Bed',
+    meaning:"For Winston and Julia, just being in this bed together is a massive act of defiance. The Party outlaws real intimacy because private loyalty is a threat to its control. Their connection isn't just romance; it's a direct political strike against a regime that demands total obedience.",
+    quote:"Their embrace had been a battle, the climax a victory. It was a blow struck against the Party. It was a political act.",
+    cite:"NINETEEN EIGHTY-FOUR · PART TWO, II",
+    art:'bed', modernArt:'bedModern',
+    modernName:'THE UNPOSTED MOMENT',
+    modernCap:"Today, in a culture that profits off keeping people isolated, angry, and divided, simply choosing to deeply care for someone is its own act of rebellion."
+  },
+  {
+    id:'window', kicker:'OBJECT II — THE PROLES',
+    name:'The Window & the Song',
+    meaning:"The Party uses machines called 'versificators' to generate mindless music. The prole woman singing in the yard represents the raw, authentic human emotion that the Party hasn't been able to crush.",
+    quote:"It was only an 'opeless fancy.\nIt passed like an Ipril dye,\nBut a look an' a word an' the dreams they stirred!\nThey 'ave stolen my 'eart awye!",
+    cite:"NINETEEN EIGHTY-FOUR · PART TWO, IV",
+    art:'window', modernArt:'windowModern',
+    modernName:'THE VERSIFICATOR',
+    modernCap:"With generative AI flooding our feeds with machine-made art, our modern equivalent is the fight to preserve raw, flawed, real human expression."
+  },
+  {
+    id:'weight', kicker:'OBJECT III — THE PAST',
+    name:'The Glass Paperweight',
+    meaning:"It's a useless chunk of glass, which is exactly why Winston loves it. It's physical proof of a past the Party hasn't managed to erase yet. He views the glass dome as a safe, eternal sanctuary for him and Julia.",
+    quote:"It's a little chunk of history that they've forgotten to alter. It's a message from a hundred years ago, if one knew how to read it.",
+    cite:"NINETEEN EIGHTY-FOUR · PART TWO, IV",
+    art:'weight', modernArt:'weightModern',
+    modernName:'THE UNALTERED COPY',
+    modernCap:"In a digital world where reality is shadow-edited and deepfaked, physical evidence, like printed archives or the actual ruins of conflict, is the only undeniable proof we have left."
+  },
+  {
+    id:'rat', kicker:'OBJECT IV — FEAR',
+    name:'The Rat in the Wainscoting',
+    meaning:"The rat is Winston's absolute worst nightmare. It foreshadows Room 101, where the Party eventually weaponizes his specific phobia to completely break his mind and spirit.",
+    quote:"He was standing in front of a wall of darkness, and on the other side of it there was something unendurable, something too dreadful to be faced.",
+    cite:"NINETEEN EIGHTY-FOUR · PART TWO, VII",
+    art:'rat', modernArt:'ratModern',
+    modernName:'THE DOOMSCROLL',
+    modernCap:"The 24/7 news cycle and social media algorithms run on fear, skewing reality by pushing worst-case scenarios to keep us anxious, engaged, and compliant."
+  },
+  {
+    id:'print', kicker:'OBJECT V — SURVEILLANCE',
+    name:"The St Clement's Print",
+    meaning:"Winston loved this picture because it felt like a safe piece of the past. But the telescreen was hiding behind it all along. The sanctuary was a trap from day one, proving the Party is always watching and privacy is just an illusion.",
+    quote:"Oranges and lemons, say the bells of St Clement's,\nYou owe me three farthings, say the bells of St Martin's…",
+    cite:"NINETEEN EIGHTY-FOUR · PART TWO, VIII",
+    art:'print', modernArt:'printModern',
+    modernName:'THE LISTENING SHELF',
+    modernCap:"We don't need a dictator to hide microphones in our walls. We willingly buy smart speakers and location trackers, surrendering our privacy for convenience."
+  },
+  {
+    id:'book', kicker:'OBJECT VI — FORBIDDEN TRUTH',
+    name:"Goldstein's Book",
+    meaning:"This forbidden book outlines exactly how the Party manipulates everyone. It doesn't give Winston new facts, but it proves he isn't insane: it gives him his sanity back by confirming what he already suspected.",
+    quote:"He was alone: no telescreen, no ear at the keyhole… The book fascinated him, or more exactly it reassured him… The best books, he perceived, are those that tell you what you know already.",
+    cite:"NINETEEN EIGHTY-FOUR · PART TWO, IX · P. 200, SIGNET CLASSICS ED.",
+    art:'book', modernArt:'bookModern',
+    modernName:'BURIED IN PLAIN SIGHT',
+    modernCap:"The truth today doesn't have to be censored, it's just buried. Algorithms push outrage to the top, while actual reporting gets lost under a mountain of noise."
+  }
+];
+
+/* ============================================================
+   HOTSPOTS — screen-space boxes derived from iso coordinates
+   ============================================================ */
+function bboxOf(pts, pad){
+  pad = pad || 2;
+  let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+  for (const p of pts){
+    if (p[0] < x0) x0 = p[0]; if (p[0] > x1) x1 = p[0];
+    if (p[1] < y0) y0 = p[1]; if (p[1] > y1) y1 = p[1];
+  }
+  return { x0: x0 - pad, y0: y0 - pad, x1: x1 + pad, y1: y1 + pad };
+}
+const HOT = {
+  bed:    bboxOf([P(0,42,34), P(46,42,18), P(46,70,0), P(0,70,0), P(46,42,0)]),
+  window: bboxOf([WL(40,40), WL(72,40), WL(72,88), WL(40,88)]),
+  weight: bboxOf([P(50,49,21), P(57,55,21), P(57,55,30), P(50,49,30)], 8),
+  rat:    bboxOf([WR(58,0), WR(80,0), WR(80,14), WR(58,14)], 3),
+  print:  bboxOf([WR(28,42), WR(48,42), WR(48,72), WR(28,72)]),
+  book:   bboxOf([P(0,72,0), P(15,72,0), P(15,86,0), P(0,86,22), P(0,72,22)])
+};
+const HIT_ORDER = ['weight','book','bed','rat','print','window'];
+
+/* ============================================================
+   SCENE DRAWING
+   ============================================================ */
+function drawWalls(t){
+  poly([WL(0,0), WL(EXT,0), WL(EXT,WALL_H), WL(0,WALL_H)], PAL.wallL1);
+  poly([WR(0,0), WR(EXT,0), WR(EXT,WALL_H), WR(0,WALL_H)], PAL.wallR1);
+  for (let v = 14; v < EXT; v += 14) wallLrect(v, 12, 1, WALL_H - 12, PAL.seamL);
+  for (let u = 14; u < EXT; u += 14) wallRrect(u, 12, 1, WALL_H - 12, PAL.seamR);
+  for (let v = 6; v < EXT; v += 11) for (let h = 30; h < WALL_H - 8; h += 16){
+    wallLrect(v + ((h / 16) % 2) * 5, h, 1, 1, PAL.wallL2);
+  }
+  for (let u = 6; u < EXT; u += 11) for (let h = 30; h < WALL_H - 8; h += 16){
+    wallRrect(u + ((h / 16) % 2) * 5, h, 1, 1, PAL.wallR2);
+  }
+  wallLrect(6, 70, 9, 16, 'rgba(20,14,6,0.35)');
+  wallLrect(8, 76, 5, 10, 'rgba(20,14,6,0.35)');
+  wallRrect(58, 78, 12, 12, 'rgba(20,14,6,0.30)');
+  wallRrect(4, 20, 6, 26, 'rgba(20,14,6,0.25)');
+  poly([WL(0,0), WL(EXT,0), WL(EXT,13), WL(0,13)], PAL.wainL);
+  poly([WR(0,0), WR(EXT,0), WR(EXT,13), WR(0,13)], PAL.wainR);
+  wallLrect(0, 13, EXT, 2, PAL.rail);
+  wallRrect(0, 13, EXT, 2, PAL.rail);
+  wallLrect(0, 0, 2, WALL_H, 'rgba(0,0,0,0.35)');
+  wallRrect(0, 0, 2, WALL_H, 'rgba(0,0,0,0.35)');
+}
+
+function drawWindow(t){
+  const v0 = 40, v1 = 72, h0 = 40, h1 = 88;
+  wallLrect(v0 - 2, h0 - 3, (v1 - v0) + 4, (h1 - h0) + 6, PAL.woodD);
+  wallLrect(v0 - 1, h0 - 2, (v1 - v0) + 2, (h1 - h0) + 4, PAL.wood);
+  wallLrect(v0, h0, v1 - v0, h1 - h0, '#8a93a0');
+  wallLrect(v0, h0 + 30, v1 - v0, 6, '#959eaa');
+  wallLrect(v0, h0, v1 - v0, 12, '#6e3a30');
+  for (let v = v0; v < v1; v += 5) wallLrect(v, h0 + 4, 2, 1, '#5c2f27');
+  for (let v = v0 + 2; v < v1; v += 5) wallLrect(v, h0 + 9, 2, 1, '#5c2f27');
+  wallLrect(v0 + 1, h0 + 33, v1 - v0 - 2, 1, '#2b2b2b');
+  const sway = (Math.floor(t / 700) % 2);
+  for (const dv of [4, 13, 22]){
+    wallLrect(v0 + dv + sway, h0 + 26, 5, 7, '#ecebe4');
+    wallLrect(v0 + dv + sway, h0 + 26, 5, 2, '#d6d5ca');
+  }
+  const base = WL(v0 + 26, h0 + 10);
+  drawMap(C, (Math.floor(t / 800) % 2) ? SPR.proleUp.map : SPR.proleDown.map,
+          SPR.proleUp.pal, base[0] - 4, base[1] - 11, 1);
+  wallLrect(v0 + Math.floor((v1 - v0) / 2), h0, 1, h1 - h0, PAL.woodD);
+  wallLrect(v0, h0 + Math.floor((h1 - h0) / 2), v1 - v0, 1, PAL.woodD);
+  const cs = (Math.floor(t / 900) % 2);
+  wallLrect(v0 - 1, h0, 4 + cs, h1 - h0 + 2, 'rgba(216,210,198,0.75)');
+  wallLrect(v1 - 3 - cs, h0, 4 + cs, h1 - h0 + 2, 'rgba(216,210,198,0.75)');
+  wallLrect(v0 - 2, h0 - 5, (v1 - v0) + 4, 3, PAL.woodL);
+  const sm = WL(v0 + 8, h0 - 5);
+  drawMap(C, SPR.music.map, SPR.music.pal, sm[0] - 3, sm[1] - 4, 1);
+}
+
+function drawPrint(fallDrop){
+  const u0 = 28, u1 = 48, h0 = 42, h1 = 72;
+  C.save();
+  if (fallDrop > 0) C.translate(0, fallDrop);
+  wallRrect(u0 - 1, h0 - 1, (u1 - u0) + 2, (h1 - h0) + 2, '#43200f');
+  wallRrect(u0, h0, u1 - u0, h1 - h0, '#5a2c20');
+  wallRrect(u0 + 1, h0 + 1, (u1 - u0) - 2, (h1 - h0) - 2, '#c9a23f');
+  wallRrect(u0 + 2, h0 + 2, (u1 - u0) - 4, (h1 - h0) - 4, '#d6cdb6');
+  wallRrect(u0 + 5, h0 + 6, 10, 12, '#5c6b78');
+  wallRrect(u0 + 7, h0 + 18, 6, 4, '#5c6b78');
+  wallRrect(u0 + 15, h0 + 8, 2, 12, '#46525c');
+  for (let i = 0; i < 3; i++){
+    wallRrect(u0 + 6 + i * 3, h0 + 9, 1, 2, '#d6cdb6');
+    wallRrect(u0 + 6 + i * 3, h0 + 13, 1, 2, '#d6cdb6');
+  }
+  wallRrect(u0 + 2, h0 + 2, (u1 - u0) - 4, 1, '#e6ddc6');
+  C.restore();
+}
+
+function drawClock(){
+  const u0 = 56, h0 = 56;
+  wallRrect(u0 - 1, h0 - 1, 11, 13, PAL.woodD);
+  wallRrect(u0, h0, 9, 11, PAL.wood);
+  wallRrect(u0 + 1, h0 + 2, 7, 8, '#ded5bc');
+  wallRrect(u0 + 4, h0 + 5, 1, 3, '#1a1a1a');
+  wallRrect(u0 + 4, h0 + 5, 3, 1, '#1a1a1a');
+  wallRrect(u0 + 4, h0 + 0, 2, 2, PAL.brass);
+}
+
+function drawRatHole(t){
+  /* a bigger, darker hole with crumbled edges */
+  wallRrect(61, 0, 18, 12, '#0a0805');
+  wallRrect(62, 10, 16, 3, '#060403');
+  wallRrect(60, 0, 1, 6, '#1c150c');
+  wallRrect(79, 0, 1, 6, '#1c150c');
+  /* the rat, larger and lighter so it reads at a glance */
+  const b = WR(70, 0);
+  const tw = (Math.floor(t / 450) % 2);
+  drawMap(C, SPR.ratS.map, SPR.ratS.pal, b[0] - 13 - tw, b[1] - 6, 1);
+}
+
+function drawFloor(){
+  for (let v = 0; v < EXT; v += 8){
+    const d = Math.min(8, EXT - v);
+    isoTop(0, v, EXT, d, 0, (v / 8) % 2 ? PAL.floorA : PAL.floorB);
+    isoTop(0, v, EXT, 1, 0, PAL.floorSeam);
+  }
+  for (let v = 0; v < EXT; v += 8){
+    for (let u = (v % 16) ? 20 : 44; u < EXT; u += 36){
+      isoTop(u, v, 1, 8, 0, PAL.floorSeam);
+    }
+  }
+  /* wear and tear: stains, scuffs, a worn walking path */
+  isoTop(54, 56, 22, 16, 0, 'rgba(12,8,3,0.30)');       /* spill under the table edge */
+  isoTop(60, 60, 10, 8, 0, 'rgba(12,8,3,0.30)');
+  isoTop(8, 30, 12, 8, 0, 'rgba(12,8,3,0.22)');         /* old water stain by the chair */
+  isoTop(70, 20, 9, 7, 0, 'rgba(12,8,3,0.25)');
+  isoTop(26, 56, 26, 14, 0, 'rgba(232,210,160,0.05)');  /* path worn pale between bed and table */
+  isoTop(34, 60, 14, 8, 0, 'rgba(232,210,160,0.05)');
+  /* scratches along the planks */
+  isoTop(30, 18, 9, 0.7, 0, '#241808');
+  isoTop(48, 27, 7, 0.7, 0, '#241808');
+  isoTop(14, 52, 6, 0.7, 0, '#241808');
+  isoTop(66, 44, 8, 0.7, 0, '#241808');
+  isoTop(52, 74, 6, 0.7, 0, '#241808');
+  /* knots and nail heads */
+  for (const k of [[22,12],[58,9],[37,35],[73,30],[20,66],[63,68],[44,50]]){
+    isoTop(k[0], k[1], 1.2, 1, 0, '#221606');
+  }
+}
+
+function drawArmchair(){
+  /* the deep, slatternly arm-chair (Part One, VIII), back corner */
+  isoBox(0, 8, 4, 20, 30, PAL.leatherL, PAL.leather, PAL.leatherD);     /* backrest */
+  isoBox(4, 8, 14, 3, 18, PAL.leather, PAL.leatherL, PAL.leatherD);     /* far armrest */
+  isoBox(4, 25, 14, 3, 18, PAL.leather, PAL.leatherL, PAL.leatherD);    /* near armrest */
+  isoBox(4, 11, 13, 14, 11, PAL.leather, PAL.leatherL, PAL.leatherD);   /* seat base */
+  isoBox(5, 12, 11, 12, 3, '#7d5a40', '#6b4a35', '#553722', 11);        /* sagging cushion */
+  isoTop(8, 15, 5, 6, 14.2, '#5d3f2c');                                  /* worn hollow */
+  /* patches and splits in the leather */
+  isoTop(6, 13, 2, 2, 14.4, '#4a3120');
+  poly([P(4,28,4), P(4,28,9), P(4,24,9), P(4,24,4)], '#4a3120');
+  poly([P(0,28,16), P(0,28,22), P(0,26,22), P(0,26,16)], '#553722');
+}
+
+function drawBed(){
+  isoBox(0, 42, 4, 28, 34, PAL.mahogL, PAL.mahog, PAL.mahogD);
+  isoTop(1, 44, 2, 24, 34, PAL.mahog);
+  isoBox(4, 42, 42, 28, 10, PAL.mahog, PAL.mahogL, PAL.mahogD);
+  isoBox(5, 43, 40, 26, 7, PAL.sheet, PAL.sheetD, PAL.sheetD, 10);
+  isoBox(6, 45, 7, 22, 6, PAL.bolster, '#cfc4a8', '#bdb295', 17);
+  isoBox(16, 43, 29, 26, 2, PAL.blanket, PAL.blanketD, PAL.blanketD, 16);
+  isoTop(20, 45, 1, 22, 18, PAL.blanketD);
+  isoTop(30, 44, 1, 24, 18, PAL.blanketD);
+  isoTop(40, 45, 1, 22, 18, PAL.blanketD);
+  isoTop(11, 52, 2, 1, 17.4, '#c0263a');
+  isoTop(12, 56, 1, 1, 17.4, '#d9a441');
+  isoBox(44, 42, 2, 2, 14, PAL.mahogL, PAL.mahog, PAL.mahogD);
+  isoBox(44, 68, 2, 2, 14, PAL.mahogL, PAL.mahog, PAL.mahogD);
+}
+
+function drawNightstand(){
+  isoBox(1, 73, 13, 12, 14, PAL.wood, PAL.woodL, PAL.woodD);
+  isoTop(2, 74, 11, 10, 14, PAL.woodL);
+  poly([P(14,76,3), P(14,83,3), P(14,83,11), P(14,76,11)], PAL.woodD);
+  poly([P(14,79,6), P(14,81,6), P(14,81,8), P(14,79,8)], PAL.brass);
+  /* Goldstein's book: cream page block with a dark cover overhanging */
+  isoBox(4, 76, 8, 6, 2.5, '#d8d0bc', '#cfc6ae', '#b5ad99', 14);
+  isoBox(3.6, 75.6, 8.8, 6.8, 1.4, '#23211d', '#16140f', '#0e0c0a', 16.5);
+  isoTop(7, 76.2, 1, 6, 18, '#5a4630');   /* string tied around the cover */
+}
+
+function drawTable(t){
+  isoBox(48, 34, 24, 22, 3, PAL.woodL, PAL.wood, PAL.woodD, 18);
+  isoTop(49, 35, 22, 20, 21, PAL.wood);
+  poly([P(48,56,18), P(72,56,18), P(72,56,6), P(48,56,6)], PAL.woodD);
+  poly([P(50,56,16), P(70,56,16), P(70,56,8), P(50,56,8)], PAL.wood);
+  isoBox(50, 36, 2, 2, 18, PAL.wood, PAL.wood, PAL.woodD);
+  isoBox(68, 36, 2, 2, 18, PAL.wood, PAL.wood, PAL.woodD);
+  isoBox(50, 52, 2, 2, 18, PAL.wood, PAL.wood, PAL.woodD);
+  isoBox(68, 52, 2, 2, 18, PAL.wood, PAL.wood, PAL.woodD);
+  isoBox(58, 41, 5, 5, 2, PAL.brass, '#7a5f26', '#5e481c', 21);
+  isoBox(59.5, 42.5, 2, 2, 3, PAL.brass, '#7a5f26', '#5e481c', 23);
+  const fl = (Math.floor(t / 260) % 2);
+  isoBox(59, 42, 3, 3, 7, 'rgba(255,234,166,0.85)', 'rgba(255,215,94,0.7)', 'rgba(255,180,60,0.7)', 26);
+  isoBox(59.8, 42.8, 1.4, 1.4, 4 + fl, fl ? PAL.flame1 : PAL.flame2, PAL.flame2, '#e07820', 27);
+  isoBox(51, 50, 5, 4, 4, '#a6c8d2', '#8fb9c6', '#6f9aaa', 21);
+  isoBox(52, 51, 3, 2, 5, '#bcd9e0', '#a6c8d2', '#8fb9c6', 21);
+  isoTop(52.7, 51.5, 1.6, 1, 25.4, '#de8aa4');
+  isoTop(52, 51, 1, 0.8, 26, '#e4f2f5');
+}
+
+function drawStove(){
+  isoBox(12, 3, 12, 9, 15, PAL.stoveL, PAL.stove, PAL.stoveD);
+  isoTop(14, 4.5, 8, 6, 15, '#2c2e24');
+  isoTop(16, 6, 4, 3, 15.4, '#15160f');
+  isoTop(17, 6.8, 2, 1.4, 15.8, '#5aa0d8');
+  poly([P(24,7,2), P(24,11,2), P(24,11,9), P(24,7,9)], 'rgba(10,8,4,0.45)');
+  isoBox(15, 5, 5, 4, 3, '#5d6168', '#4a4e54', '#3c4046', 15);
+}
+
+function drawLightAndGrime(t){
+  const L = P(61, 44, 30);
+  const fl = (Math.floor(t / 260) % 2) ? 1 : 0;
+  for (const ring of [[64 + fl * 2, 0.05], [42, 0.07], [24, 0.10]]){
+    const r = ring[0];
+    poly([[L[0]-r, L[1]], [L[0], L[1]-r/2], [L[0]+r, L[1]], [L[0], L[1]+r/2]],
+         'rgba(255,210,100,' + ring[1] + ')');
+  }
+  poly([[0,0],[W,0],[W,26],[0,26]], 'rgba(0,0,0,0.34)');
+  poly([[0,0],[26,0],[0,70]], 'rgba(0,0,0,0.30)');
+  poly([[W,0],[W,70],[W-26,0]], 'rgba(0,0,0,0.30)');
+  poly([[0,H],[W,H],[W,H-14],[0,H-14]], 'rgba(0,0,0,0.30)');
+  poly([[0,H],[0,H-90],[34,H]], 'rgba(0,0,0,0.26)');
+  poly([[W,H],[W,H-90],[W-34,H]], 'rgba(0,0,0,0.26)');
+}
+
+/* ============================================================
+   GLOW BRACKETS, MARKERS + MAIN LOOP
+   ============================================================ */
+const state = {
+  found: new Set(),
+  armed: false,
+  climax: false,
+  climaxT0: 0,
+  frozen: false
+};
+
+function drawBrackets(t){
+  if (state.climax) return;
+  let i = 0;
+  for (const id of HIT_ORDER){
+    const b = HOT[id];
+    const seen = state.found.has(id);
+    const a = seen ? 0.22 : 0.45 + 0.45 * Math.abs(Math.sin(t / 320 + i * 1.3));
+    const col = seen ? 'rgba(141,128,100,' + a + ')' : 'rgba(242,207,110,' + a + ')';
+    const L = 6;
+    C.fillStyle = col;
+    C.fillRect(b.x0, b.y0, L, 1); C.fillRect(b.x0, b.y0, 1, L);
+    C.fillRect(b.x1 - L, b.y0, L, 1); C.fillRect(b.x1 - 1, b.y0, 1, L);
+    C.fillRect(b.x0, b.y1 - 1, L, 1); C.fillRect(b.x0, b.y1 - L, 1, L);
+    C.fillRect(b.x1 - L, b.y1 - 1, L, 1); C.fillRect(b.x1 - 1, b.y1 - L, 1, L);
+    if (seen){
+      C.fillStyle = 'rgba(217,169,63,0.9)';
+      C.fillRect(b.x1 - 5, b.y0 + 2, 3, 3);
+    } else {
+      /* bobbing marker so it is obvious the object can be tapped */
+      const mx = ((b.x0 + b.x1) / 2) | 0;
+      const my = (b.y0 - 7 + Math.round(Math.sin(t / 280 + i) * 2)) | 0;
+      poly([[mx-4,my],[mx,my-4],[mx+4,my],[mx,my+4]], 'rgba(10,8,5,0.85)');
+      poly([[mx-3,my],[mx,my-3],[mx+3,my],[mx,my+3]], '#d9a93f');
+      C.fillStyle = '#f6e3a4';
+      C.fillRect(mx - 1, my - 1, 1, 1);
+    }
+    i++;
+  }
+}
+
+function drawTelescreen(t){
+  const u0 = 22, u1 = 56, h0 = 28, h1 = 84;
+  wallRrect(u0 - 2, h0 - 2, (u1 - u0) + 4, (h1 - h0) + 4, '#0a0a0a');
+  for (let u = u0; u < u1; u += 2){
+    for (let h = h0; h < h1; h += 2){
+      const r = Math.random();
+      wallRrect(u, h, 2, 2, r > 0.82 ? '#e8e8e8' : (r > 0.6 ? '#9a9a9a' : (r > 0.35 ? '#4a4a4a' : '#111')));
+    }
+  }
+  const tear = h0 + ((t / 18) % (h1 - h0));
+  wallRrect(u0, tear, u1 - u0, 2, '#ffffff');
+  if (Math.floor(t / 300) % 2) wallRrect(u0 - 2, h0 - 2, (u1 - u0) + 4, 2, '#c1271b');
+}
+
+/* ---------- the watchful eye in the header ---------- */
+const eyeCv = document.getElementById('bbeye');
+const EC = eyeCv.getContext('2d');
+EC.imageSmoothingEnabled = false;
+let gpx = innerWidth / 2, gpy = 0;
+document.addEventListener('pointermove', e => { gpx = e.clientX; gpy = e.clientY; });
+document.addEventListener('pointerdown', e => { gpx = e.clientX; gpy = e.clientY; });
+const EYE_ROWS = [
+  [3, 4], [4, 8], [5, 11], [6, 12], [7, 13], [8, 13], [9, 12], [10, 11], [11, 8], [12, 4]
+];
+function drawBBEye(t){
+  EC.clearRect(0, 0, 28, 16);
+  const blink = (t % 4400) < 130;
+  /* dark outline */
+  for (const [y, hw] of EYE_ROWS){
+    EC.fillStyle = '#0a0805';
+    EC.fillRect(14 - hw - 1, y - 1.5 + 1, (hw + 1) * 2, 1);
+  }
+  if (blink){
+    EC.fillStyle = '#0a0805';
+    EC.fillRect(2, 7, 24, 3);
+    EC.fillStyle = '#56452a';
+    EC.fillRect(3, 8, 22, 1);
+    return;
+  }
+  for (const [y, hw] of EYE_ROWS){
+    EC.fillStyle = '#e8e0c8';
+    EC.fillRect(14 - hw, y, hw * 2, 1);
+  }
+  /* pupil follows the cursor */
+  const r = eyeCv.getBoundingClientRect();
+  const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+  const dx = Math.max(-1, Math.min(1, (gpx - cx) / 160)) * 5;
+  const dy = Math.max(-1, Math.min(1, (gpy - cy) / 160)) * 2;
+  const ix = (14 + dx - 3) | 0, iy = (8 + dy - 3) | 0;
+  EC.fillStyle = '#c1271b'; EC.fillRect(ix, iy, 6, 6);
+  EC.fillStyle = '#7a130c'; EC.fillRect(ix, iy, 6, 1); EC.fillRect(ix, iy + 5, 6, 1);
+  EC.fillStyle = '#0a0805'; EC.fillRect(ix + 2, iy + 2, 2, 2);
+  EC.fillStyle = '#ffffff'; EC.fillRect(ix + 4, iy + 1, 1, 1);
+}
+
+/* ---------- main loop ---------- */
+let dragging = false;
+function draw(t){
+  C.clearRect(0, 0, W, H);
+  px(0, 0, W, H, PAL.night);
+
+  let shakeX = 0, shakeY = 0, printDrop = 0, climaxPh = 0;
+  if (state.climax){
+    climaxPh = (t - state.climaxT0) / 1000;
+    if (climaxPh < 0.55){
+      shakeX = (Math.random() * 4 - 2) | 0;
+      shakeY = (Math.random() * 4 - 2) | 0;
+    }
+    printDrop = Math.min(1, Math.max(0, (climaxPh - 0.2) / 1.0));
+    printDrop = printDrop * printDrop * 96;
+  }
+
+  C.save();
+  C.translate(shakeX, shakeY);
+  drawWalls(t);
+  drawWindow(t);
+  drawClock();
+  if (state.climax && climaxPh > 0.55) drawTelescreen(t);
+  if (!state.climax || climaxPh < 1.25) drawPrint(printDrop);
+  else {
+    isoBox(30, 4, 16, 11, 2, '#5a2c20', '#43200f', '#3a1c0d');
+    isoTop(33, 6, 10, 7, 2, '#d6cdb6');
+    isoTop(35, 7, 6, 1, 2.2, '#8a8578');
+    isoTop(38, 9, 1, 3, 2.2, '#8a8578');
+  }
+  drawRatHole(t);
+  drawFloor();
+  drawArmchair();
+  drawStove();
+  drawBed();
+  drawNightstand();
+  drawTable(t);
+  drawLightAndGrime(t);
+  drawBrackets(t);
+  if (state.climax){
+    if (Math.floor(t / 160) % 5 === 0) px(0, 0, W, H, 'rgba(220,230,240,0.08)');
+    px(0, 0, W, H, 'rgba(0,0,16,' + Math.min(0.25, climaxPh * 0.08) + ')');
+  }
+  C.restore();
+
+  /* gentle parallax while not zoomed in */
+  if (view.z <= PARA_Z && !dragging && !state.climax){
+    const tx = -hoverNX * (W * view.z - W);
+    const ty = -hoverNY * (H * view.z - H);
+    view.x += (tx - view.x) * 0.07;
+    view.y += (ty - view.y) * 0.07;
+  }
+  clampView();
+
+  /* blit through the view transform */
+  VC.imageSmoothingEnabled = false;
+  VC.clearRect(0, 0, W, H);
+  VC.save();
+  VC.translate(view.x, view.y);
+  VC.scale(view.z, view.z);
+  VC.drawImage(OFF, 0, 0);
+  VC.restore();
+
+  drawBBEye(t);
+  requestAnimationFrame(draw);
+}
+
+/* ============================================================
+   INPUT — tap, hover, wheel zoom, drag pan, pinch
+   ============================================================ */
+function canvasXY(e){
+  const r = cv.getBoundingClientRect();
+  return [ (e.clientX - r.left) * W / r.width, (e.clientY - r.top) * H / r.height ];
+}
+function sceneXY(e){
+  const c = canvasXY(e);
+  return [ (c[0] - view.x) / view.z, (c[1] - view.y) / view.z ];
+}
+function hitTest(x, y){
+  for (const id of HIT_ORDER){
+    const b = HOT[id];
+    if (x >= b.x0 && x <= b.x1 && y >= b.y0 && y <= b.y1) return id;
+  }
+  return null;
+}
+
+const pointers = new Map();
+let pinch = null, moved = false, lastTapT = 0, lastTapX = 0, lastTapY = 0;
+
+cv.addEventListener('pointerdown', e => {
+  cv.setPointerCapture(e.pointerId);
+  pointers.set(e.pointerId, { x: e.clientX, y: e.clientY, sx: e.clientX, sy: e.clientY });
+  moved = false;
+  if (pointers.size === 2){
+    const ps = [...pointers.values()];
+    pinch = {
+      d0: Math.hypot(ps[0].x - ps[1].x, ps[0].y - ps[1].y),
+      z0: view.z
+    };
+  }
+});
+
+cv.addEventListener('pointermove', e => {
+  const r = cv.getBoundingClientRect();
+  hoverNX = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width));
+  hoverNY = Math.max(0, Math.min(1, (e.clientY - r.top) / r.height));
+
+  if (pointers.has(e.pointerId)){
+    const p = pointers.get(e.pointerId);
+    const dxC = e.clientX - p.x, dyC = e.clientY - p.y;
+    p.x = e.clientX; p.y = e.clientY;
+    if (Math.hypot(e.clientX - p.sx, e.clientY - p.sy) > 7) moved = true;
+
+    if (pointers.size === 2 && pinch){
+      const ps = [...pointers.values()];
+      const d = Math.hypot(ps[0].x - ps[1].x, ps[0].y - ps[1].y);
+      const mx = ((ps[0].x + ps[1].x) / 2 - r.left) * W / r.width;
+      const my = ((ps[0].y + ps[1].y) / 2 - r.top) * H / r.height;
+      zoomAt(mx, my, pinch.z0 * d / Math.max(1, pinch.d0));
+    } else if (pointers.size === 1 && moved && view.z > PARA_Z){
+      dragging = true;
+      view.x += dxC * W / r.width;
+      view.y += dyC * H / r.height;
+      clampView();
+    }
+  }
+  if (state.climax || state.frozen){ cv.classList.remove('pointy'); return; }
+  if (!dragging && pointers.size === 0){
+    const [x, y] = sceneXY(e);
+    cv.classList.toggle('pointy', !!hitTest(x, y));
+  }
+});
+
+function endPointer(e){
+  const wasPinch = !!pinch;
+  pointers.delete(e.pointerId);
+  if (pointers.size < 2) pinch = null;
+  if (pointers.size === 0){
+    const wasDragging = dragging;
+    dragging = false;
+    if (wasDragging || wasPinch || moved) return;
+
+    /* a clean tap */
+    if (state.climax || state.frozen) return;
+    const [x, y] = sceneXY(e);
+    const id = hitTest(x, y);
+    if (id){ openObject(id); return; }
+    /* double-tap on empty space toggles zoom */
+    const now = performance.now();
+    const [cx, cy] = canvasXY(e);
+    if (now - lastTapT < 350 && Math.hypot(cx - lastTapX, cy - lastTapY) < 40){
+      zoomAt(cx, cy, view.z < 1.5 ? 1.9 : MINZ);
+      lastTapT = 0;
+    } else {
+      lastTapT = now; lastTapX = cx; lastTapY = cy;
+    }
+  }
+}
+cv.addEventListener('pointerup', endPointer);
+cv.addEventListener('pointercancel', endPointer);
+
+cv.addEventListener('wheel', e => {
+  e.preventDefault();
+  const [cx, cy] = canvasXY(e);
+  zoomAt(cx, cy, view.z * Math.exp(-e.deltaY * 0.0016));
+  cv.classList.toggle('grabby', view.z > PARA_Z);
+}, { passive: false });
+
+/* ============================================================
+   MODAL
+   ============================================================ */
+const modal      = document.getElementById('modal');
+const modalPanel = document.getElementById('modalPanel');
+const artCv      = document.getElementById('artCv');
+const artC       = artCv.getContext('2d');
+const eraLabel   = document.getElementById('eraLabel');
+const modernCap  = document.getElementById('modernCap');
+const eyeBtn     = document.getElementById('eyeBtn');
+const eyeText    = document.getElementById('eyeText');
+const scrollChip = document.getElementById('scrollChip');
+let currentObj   = null, modernMode = false;
+artC.imageSmoothingEnabled = false;
+
+function renderArt(){
+  artC.clearRect(0, 0, 140, 140);
+  const a = ART[modernMode ? currentObj.modernArt : currentObj.art];
+  const sz = mapSize(a.map);
+  const s = Math.max(1, Math.floor(Math.min(124 / sz[0], 124 / sz[1])));
+  const x = ((140 - sz[0] * s) / 2) | 0, y = ((140 - sz[1] * s) / 2) | 0;
+  drawMap(artC, a.map, a.pal, x, y, s);
+  artC.fillStyle = modernMode ? '#4db8ff' : '#d9a93f';
+  for (const c of [[2,2],[134,2],[2,134],[134,134]]){
+    artC.fillRect(c[0], c[1], 4, 1); artC.fillRect(c[0], c[1], 1, 4);
+  }
+  eraLabel.textContent = modernMode ? '— TODAY — ' + currentObj.modernName : '— 1984 —';
+  eraLabel.classList.toggle('modern', modernMode);
+  eyeText.textContent = modernMode ? 'SEE 1984' : 'SEE TODAY';
+  modernCap.textContent = currentObj.modernCap;
+  modernCap.classList.toggle('show', modernMode);
+}
+
+function openObject(id){
+  currentObj = OBJECTS.find(o => o.id === id);
+  modernMode = false;
+  document.getElementById('objKicker').textContent  = currentObj.kicker;
+  document.getElementById('objName').textContent    = currentObj.name;
+  document.getElementById('objMeaning').textContent = currentObj.meaning;
+  document.getElementById('objQuote').textContent   = '\u201C' + currentObj.quote + '\u201D';
+  document.getElementById('objCite').textContent    = currentObj.cite;
+  renderArt();
+  modal.classList.remove('hidden');
+  modalPanel.scrollTop = 0;
+  /* show a scroll cue if the quote sits below the fold */
+  requestAnimationFrame(() => {
+    scrollChip.classList.toggle('show',
+      modalPanel.scrollHeight - modalPanel.clientHeight > 28);
+  });
+  if (!state.found.has(id)){
+    state.found.add(id);
+    updateMeter();
+  }
+}
+modalPanel.addEventListener('scroll', () => {
+  if (modalPanel.scrollTop > 30) scrollChip.classList.remove('show');
+});
+
+function closeModal(){
+  modal.classList.add('hidden');
+  if (state.found.size === 6 && !state.armed && !state.climax){
+    state.armed = true;
+    const stage = document.getElementById('stage');
+    stage.classList.remove('shake'); void stage.offsetWidth;
+    stage.classList.add('shake');
+    document.getElementById('warningBtn').classList.add('show');
+    document.getElementById('pips').style.display = 'none';
+    document.querySelector('.meterlabel').style.display = 'none';
+    document.getElementById('hintLeft').innerHTML =
+      'SOMETHING IS HUMMING BEHIND THE PICTURE &middot; <span class="warnk">PRESS THE &#9888; WARNING BUTTON ABOVE</span>';
+    showToast('— BEHIND THE PICTURE —',
+      'THE WALL HUMS. PRESS THE RED &#9888; WARNING.', 4200, true);
+  }
+}
+
+eyeBtn.addEventListener('click', () => { modernMode = !modernMode; renderArt(); });
+document.getElementById('closeBtn').addEventListener('click', closeModal);
+modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+
+/* ============================================================
+   METER, TOAST, CLIMAX, FINALE
+   ============================================================ */
+const pipsEl = document.getElementById('pips');
+for (let i = 0; i < 6; i++){
+  const d = document.createElement('div');
+  d.className = 'pip';
+  pipsEl.appendChild(d);
+}
+function updateMeter(){
+  document.getElementById('count').textContent = state.found.size;
+  const pips = pipsEl.children;
+  let i = 0;
+  for (const p of pips){ p.classList.toggle('on', i < state.found.size); i++; }
+}
+
+const toast = document.getElementById('toast');
+let toastTimer = null;
+function showToast(src, html, ms, alarm){
+  document.getElementById('toastSrc').textContent = src;
+  document.getElementById('toastText').innerHTML = html;
+  toast.classList.toggle('alarm', !!alarm);
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), ms || 3200);
+}
+
+const VOICE_LINES = [
+  'YOU ARE THE DEAD.',
+  'REMAIN EXACTLY WHERE YOU ARE.',
+  'MAKE NO MOVE UNTIL YOU ARE ORDERED.',
+  'THE HOUSE IS SURROUNDED.'
+];
+const voicebox  = document.getElementById('voicebox');
+const voicetext = document.getElementById('voicetext');
+let voiceTimers = [];
+
+function speak(lines, done){
+  voicebox.classList.add('show');
+  voicetext.textContent = '';
+  let li = 0;
+  function nextLine(){
+    if (li >= lines.length){
+      voiceTimers.push(setTimeout(done, 1300));
+      return;
+    }
+    const line = lines[li];
+    let ci = 0;
+    voicetext.textContent = '';
+    const iv = setInterval(() => {
+      ci++;
+      voicetext.textContent = line.slice(0, ci) + (ci < line.length ? '\u2588' : '');
+      if (ci >= line.length){
+        clearInterval(iv);
+        voiceTimers.push(setTimeout(nextLine, 950));
+      }
+    }, 38);
+    voiceTimers.push(iv);
+    li++;
+  }
+  nextLine();
+}
+
+document.getElementById('warningBtn').addEventListener('click', () => {
+  if (state.climax) return;
+  state.climax = true;
+  state.climaxT0 = performance.now();
+  toast.classList.remove('show');
+  document.getElementById('warningBtn').classList.remove('show');
+  /* pull back to the full room so the ambush is seen whole */
+  view.z = MINZ; clampView();
+  voiceTimers.push(setTimeout(() => {
+    speak(VOICE_LINES, () => {
+      state.frozen = true;
+      voicebox.classList.remove('show');
+      document.getElementById('finale').classList.remove('hidden');
+    });
+  }, 1600));
+});
+
+document.getElementById('resetBtn').addEventListener('click', () => {
+  for (const tm of voiceTimers){ clearTimeout(tm); clearInterval(tm); }
+  voiceTimers = [];
+  state.found.clear();
+  state.armed = false; state.climax = false; state.frozen = false;
+  voicebox.classList.remove('show');
+  document.getElementById('finale').classList.add('hidden');
+  document.getElementById('warningBtn').classList.remove('show');
+  document.getElementById('pips').style.display = '';
+  document.querySelector('.meterlabel').style.display = '';
+  document.getElementById('hintLeft').innerHTML =
+    'TAP A <span class="k">GLOWING</span> OBJECT &middot; SCROLL / PINCH TO <span class="k">ZOOM</span>, DRAG TO LOOK AROUND';
+  updateMeter();
+  showToast('— THE WATCHFUL EYE —', 'VERY WELL. WE OBSERVE AGAIN.', 3400, false);
+});
+
+document.getElementById('enterBtn').addEventListener('click', () => {
+  document.getElementById('intro').classList.add('hidden');
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && !modal.classList.contains('hidden')) closeModal();
+});
+
+updateMeter();
+requestAnimationFrame(draw);
+</script>
+</body>
+</html>
