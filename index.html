@@ -216,6 +216,7 @@ header{
   position:relative;
 }
 #modal .artside{
+  grid-column:1;grid-row:1;
   background:#080604;
   border-right:3px solid var(--line2);
   padding:18px 16px 14px;
@@ -254,7 +255,7 @@ header{
   padding:10px 12px;width:280px;max-width:100%;
 }
 #modernCap.show{display:block;}
-#modal .textside{padding:22px 24px 24px;}
+#modal .textside{grid-column:2;grid-row:1;padding:22px 24px 24px;}
 #modal .objkicker{
   font-family:'Press Start 2P',monospace;font-size:8px;
   color:var(--red);letter-spacing:2px;margin-bottom:10px;
@@ -277,7 +278,9 @@ header{
   color:var(--dim);letter-spacing:1px;line-height:1.9;
 }
 #closeBtn{
-  position:sticky;top:0;float:right;
+  grid-column:2;grid-row:1;
+  justify-self:end;align-self:start;
+  position:sticky;top:8px;
   font-family:'Press Start 2P',monospace;font-size:10px;
   color:var(--paper);background:#241c10;
   border:3px solid var(--line);
@@ -288,7 +291,7 @@ header{
 #closeBtn:hover{background:var(--red);color:#fff;}
 #scrollChip{
   position:sticky;bottom:8px;
-  grid-column:1 / -1;
+  grid-row:2;grid-column:1 / -1;
   justify-self:center;
   font-family:'Press Start 2P',monospace;font-size:8px;
   color:#fff;background:var(--red);
@@ -318,7 +321,10 @@ header{
   .titleblock h1{font-size:10px;}
   #bbeye{width:44px;height:25px;}
   #modal .panel{grid-template-columns:1fr;}
-  #modal .artside{border-right:none;border-bottom:3px solid var(--line2);}
+  #modal .artside{grid-column:1;grid-row:1;border-right:none;border-bottom:3px solid var(--line2);}
+  #modal .textside{grid-column:1;grid-row:2;}
+  #closeBtn{grid-column:1;grid-row:1;}
+  #scrollChip{grid-row:3;}
   #artCv,#modernCap{width:min(280px,86vw);}
   .card h2{font-size:12px;}
   #finale h2.big{font-size:14px;}
